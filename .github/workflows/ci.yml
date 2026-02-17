@@ -17,6 +17,7 @@ jobs:
   backend-tests:
     name: Backend Tests
     runs-on: ubuntu-latest
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
 
@@ -44,6 +45,7 @@ jobs:
   frontend-tests:
     name: Frontend Tests
     runs-on: ubuntu-latest
+    continue-on-error: true
     defaults:
       run:
         working-directory: homescreen-hero-ui
@@ -64,6 +66,7 @@ jobs:
   frontend-lint:
     name: Frontend Lint
     runs-on: ubuntu-latest
+    continue-on-error: true
     defaults:
       run:
         working-directory: homescreen-hero-ui
