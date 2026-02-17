@@ -4,7 +4,14 @@ on:
   pull_request:
     branches: [develop]
   push:
-    branches: [develop, 'feature-*', 'fix-*']
+    branches:
+      - develop
+      - 'feature-*'
+      - 'feature/*'
+      - 'feat-*'
+      - 'feat/*'
+      - 'fix-*'
+      - 'fix/*'
 
 jobs:
   backend-tests:
@@ -15,7 +22,7 @@ jobs:
 
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: '3.14'
           cache: pip
           cache-dependency-path: homescreen_hero/requirements*.txt
 
