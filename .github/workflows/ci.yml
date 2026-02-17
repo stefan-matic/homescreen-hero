@@ -13,9 +13,44 @@ on:
       - 'fix-*'
       - 'fix/*'
 
+# Cancel in-progress runs for the same branch/PR
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
 jobs:
+  # Detect which parts of the codebase changed
+  changes:
+    name: Detect Changes
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+      docker: ${{ steps.filter.outputs.docker }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            backend:
+              - 'homescreen_hero/**'
+              - 'pytest.ini'
+            frontend:
+              - 'homescreen-hero-ui/**'
+            docker:
+              - 'Dockerfile'
+              - 'homescreen_hero/requirements.txt'
+              - 'homescreen-hero-ui/package-lock.json'
+
   backend-tests:
     name: Backend Tests
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:
@@ -44,6 +79,8 @@ jobs:
 
   frontend-tests:
     name: Frontend Tests
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true'
     runs-on: ubuntu-latest
     continue-on-error: true
     defaults:
@@ -65,6 +102,8 @@ jobs:
 
   frontend-lint:
     name: Frontend Lint
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true'
     runs-on: ubuntu-latest
     continue-on-error: true
     defaults:
@@ -84,6 +123,8 @@ jobs:
 
   frontend-build:
     name: Frontend Build Check
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -103,6 +144,8 @@ jobs:
 
   docker-build:
     name: Docker Build (dry run)
+    needs: changes
+    if: needs.changes.outputs.docker == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -113,7 +156,7 @@ jobs:
         run: echo "ci-${{ github.sha }}" > VERSION
 
       - name: Build Docker image (no push)
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           push: false
