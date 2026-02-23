@@ -40,6 +40,7 @@ jobs:
             backend:
               - 'homescreen_hero/**'
               - 'pytest.ini'
+              - 'homescreen_hero/requirements*.txt'
             frontend:
               - 'homescreen-hero-ui/**'
             docker:
@@ -58,7 +59,7 @@ jobs:
 
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.14'
+          python-version: '3.12'
           cache: pip
           cache-dependency-path: homescreen_hero/requirements*.txt
 
